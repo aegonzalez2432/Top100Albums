@@ -70,8 +70,8 @@ class SelectedAlbumVC: UIViewController {
         button.setImage(UIImage(systemName: "heart"), for: .normal)
         button.addTarget(self, action: #selector(self.buttonPressed), for: .touchUpInside)
         button.tintColor = .systemPink
-        button.heightAnchor.constraint(equalToConstant: 80).isActive = true
-        button.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 50).isActive = true
         button.scalesLargeContentImage = true
         button.imageView?.contentMode = .scaleAspectFit
         
@@ -91,10 +91,11 @@ class SelectedAlbumVC: UIViewController {
         self.view.addSubview(loveButton)
         self.view.backgroundColor = .white
         
-        self.albumImage.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor, constant: -30).isActive = true
+        
+        self.albumImage.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor, constant: -50).isActive = true
         self.albumImage.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        self.albumImage.heightAnchor.constraint(equalToConstant: 250).isActive = true
-        self.albumImage.widthAnchor.constraint(equalToConstant: 250).isActive = true
+        self.albumImage.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        self.albumImage.widthAnchor.constraint(equalToConstant: 150).isActive = true
         
         self.albumName.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -8).isActive = true
         self.albumName.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 8).isActive = true
@@ -119,6 +120,7 @@ class SelectedAlbumVC: UIViewController {
         self.genres.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: 8).isActive = true
         
         
+        self.loveButton.topAnchor.constraint(equalTo: self.genres.bottomAnchor, constant: 8).isActive = true
         self.loveButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 8).isActive = true
         self.loveButton.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
         

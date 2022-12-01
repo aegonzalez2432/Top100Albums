@@ -25,6 +25,9 @@ class MusicAlbumViewController: UIViewController {
     }()
     
     let musicAlbumViewModel: MusicAlbumViewModelType
+    var albumInfo = AlbumInfoViewModel()
+    var favedAlbums: [String: Results] = [:]
+    var buttPressed: Bool = false
     
     init(viewModel: MusicAlbumViewModelType) {
         self.musicAlbumViewModel = viewModel
@@ -75,32 +78,90 @@ extension MusicAlbumViewController: UICollectionViewDataSource {
         case 0:
             self.view.backgroundColor = .systemMint
             
+            
+            /*
+             TODO: if button is pressed, create the core data with items of cell, if button is clicked again, delete from core data,
+             */
+            guard let albNm = self.musicAlbumViewModel.albumTitle(for: indexPath.row) else {
+                print("failed album Name")
+                return cell}
+            guard let artNm = self.musicAlbumViewModel.artist(for: indexPath.row) else {
+                print("returned artist Name")
+                return cell}
+            let albGenre = self.musicAlbumViewModel.albumGenres(for: indexPath.row).compactMap({ elem in
+                elem.name
+            }).joined(separator: ", ")
+            guard let releaseDt = self.musicAlbumViewModel.releaseDate(for: indexPath.row) else {
+                print("failed release date")
+                return cell}
+            
+            
             cell.albumTitleLabel.text = self.musicAlbumViewModel.albumTitle(for: indexPath.row)
             cell.artist.text = self.musicAlbumViewModel.artist(for: indexPath.row)
             self.musicAlbumViewModel.imageData(for: indexPath.row, completion: { data in
                 DispatchQueue.main.async {
+                    
                     if let data = data {
                         cell.albumImage.image = UIImage(data: data)
+                        
                     }
                 }
             })
-        case 1:
+            guard let albImg = cell.albumImage.image else {return cell}
+            
+            DispatchQueue.main.async {
+                print("button pressed: \(cell.buttonIsPressed)")
+                
+            }
+            cell.favButton.addTarget(self, action: #selector(buttonPressed2), for: .touchUpInside)
+            
+            self.albumInfo.makeAlbum(albName: cell.albumTitleLabel.text ?? "failed albName" , albImage: "\(albImg)", artName: artNm, genre: albGenre, relDate: self.dateReadable(date: releaseDt))
+            print ("made the core data")
+            
+            
 
+                
+
+            
+        case 1:
+            
             self.view.backgroundColor = .systemPurple
             if cell.albumTitleLabel.text == "Album Title"{
                 cell.isHidden = true
             }
-
+            
+            /*
+             TODO: fetch core data, if empty, hide all cells. if not, isHidden = false and cell gets core data elements
+             */
+            
+            
+            
         default:
             print("idk whats wrong")
         }
         return cell
+        
+
+    }
+    @objc
+    func buttonPressed2() {
+        print("button pressed2")
+        if self.buttPressed {
+            self.buttPressed = false
+        
+        //Selected button
+        } else {
+            self.buttPressed = true
+            
+            
+        }
     }
 
 }
 
 extension MusicAlbumViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
         let albumChosen = SelectedAlbumVC()
         
         albumChosen.artistName.text = self.musicAlbumViewModel.artist(for: indexPath.row)
@@ -119,6 +180,7 @@ extension MusicAlbumViewController: UICollectionViewDelegate {
         })
         
         self.navigationController?.pushViewController(albumChosen, animated: false)
+    
     }
     func dateReadable(date: String) -> String {
         let dateArr = date.split(separator: "-")

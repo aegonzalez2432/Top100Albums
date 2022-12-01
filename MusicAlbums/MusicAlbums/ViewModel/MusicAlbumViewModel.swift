@@ -16,6 +16,8 @@ protocol MusicAlbumViewModelType {
     func releaseDate(for index: Int) -> String?
     func albumGenres(for index: Int) -> [Genre]
     func imageData(for index: Int, completion: @escaping (Data?) -> ())
+//    func favedAlbums(for index: Int) -> Results
+
     
 }
 
@@ -34,6 +36,14 @@ class MusicAlbumViewModel {
     
 }
 extension MusicAlbumViewModel: MusicAlbumViewModelType {
+    
+//    func favedAlbums(for index: Int) -> Results {
+//        guard let emptyUrl = URL(string: "") else {return Results(from: 1 as! Decoder)}
+//        return Results(artistName: "", id: "", name: "", releaseDate: "", artworkUrl100: emptyUrl, genres: [])
+//    }
+    
+
+    
     
     func bind(completion: @escaping () -> ()) {
         self.updateHandler = completion
