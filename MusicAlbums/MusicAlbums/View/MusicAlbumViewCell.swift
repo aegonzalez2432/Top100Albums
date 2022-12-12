@@ -8,9 +8,16 @@
 import Foundation
 import UIKit
 
+
+protocol MusicAlbumViewCellDelegate: AnyObject {
+    func buttonPressedAtIndex(_ index: Int) -> Int
+}
+
 class MusicAlbumViewCell: UICollectionViewCell {
     
     static let reuseID = "\(MusicAlbumViewCell.self)"
+    
+    weak var delegate: MusicAlbumViewCellDelegate?
     
     lazy var albumTitleLabel: UILabel = {
         let label = UILabel(frame: .zero)
@@ -61,6 +68,14 @@ class MusicAlbumViewCell: UICollectionViewCell {
         return button
     }()
     var buttonIsPressed: Bool = false
+    var buttonIndex: Int? {
+        willSet {
+            guard let val = newValue else {return}
+            favButton.tag = val
+        }
+    }
+    var albGenre: String = ""
+    var albRelDate: String = ""
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -100,12 +115,18 @@ class MusicAlbumViewCell: UICollectionViewCell {
         self.albumImage.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 2).isActive = true
         self.albumImage.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor).isActive = true
     }
+    func buttonPressedAtIndex(_ index: Int) -> Int {
+        return index
+    }
     
     @objc
     func buttonPressed() {
         print("button pressed")
+        guard let index = self.buttonIndex else {return}
+        delegate?.buttonPressedAtIndex(favButton.tag)
         //Deselected button
         if buttonIsPressed {
+            
             DispatchQueue.main.async {
                 self.favButton.setImage(UIImage(systemName: "heart"), for: .normal)
                 self.buttonIsPressed = false
@@ -116,6 +137,7 @@ class MusicAlbumViewCell: UICollectionViewCell {
             DispatchQueue.main.async {
                 self.favButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
                 self.buttonIsPressed = true
+                
             }
 
         }
@@ -123,3 +145,4 @@ class MusicAlbumViewCell: UICollectionViewCell {
     
     
 }
+

@@ -24,10 +24,23 @@ class MusicAlbumViewController: UIViewController {
         return table
     }()
     
-    let musicAlbumViewModel: MusicAlbumViewModelType
+    var musicAlbumViewModel: MusicAlbumViewModelType
     var albumInfo = AlbumInfoViewModel()
-    var favedAlbums: [String: Results] = [:]
-    var buttPressed: Bool = false
+    var favedAlbums: [Results] = []
+    var buttonIndex: Int?
+    var buttPressed: Bool = false {
+        didSet {
+            if oldValue == false {
+//                self.musicAlbumViewModel.buttonStates = true
+                guard let index = self.buttonIndex else {return}
+                self.musicAlbumViewModel.buttonPressedAtIndex(for: index)
+                print("button pressed, in didSet")
+                
+            } else {
+//                self.musicAlbumViewModel.buttonStates = false
+            }
+        }
+    }
     
     init(viewModel: MusicAlbumViewModelType) {
         self.musicAlbumViewModel = viewModel
@@ -49,6 +62,7 @@ class MusicAlbumViewController: UIViewController {
         }
         
         self.musicAlbumViewModel.fetchPage()
+        self.musicAlbumViewModel.setButtonStates()
     }
     
 
@@ -70,10 +84,9 @@ extension MusicAlbumViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AlbumCell", for: indexPath) as? MusicAlbumViewCell else {
-            print("could not make cell")
-            return  UICollectionViewCell()}
-        
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AlbumCell", for: indexPath) as? MusicAlbumViewCell else {return  UICollectionViewCell()}
+        cell.delegate = self
+        cell.buttonIndex = indexPath.row
         switch self.tabBarItem.tag {
         case 0:
             self.view.backgroundColor = .systemMint
@@ -115,20 +128,23 @@ extension MusicAlbumViewController: UICollectionViewDataSource {
             }
             cell.favButton.addTarget(self, action: #selector(buttonPressed2), for: .touchUpInside)
             
-            self.albumInfo.makeAlbum(albName: cell.albumTitleLabel.text ?? "failed albName" , albImage: "\(albImg)", artName: artNm, genre: albGenre, relDate: self.dateReadable(date: releaseDt))
-            print ("made the core data")
-            
-            
-
-                
-
-            
+//            if self.musicAlbumViewModel.get {
+//                self.albumInfo.makeAlbum(albName: cell.albumTitleLabel.text ?? "failed albName" , albImage: "\(albImg)", artName: artNm, genre: albGenre, relDate: self.dateReadable(date: releaseDt))
+//                print ("made the core data")
+//            }
+   
         case 1:
             
             self.view.backgroundColor = .systemPurple
-            if cell.albumTitleLabel.text == "Album Title"{
-                cell.isHidden = true
-            }
+//            if !musicAlbumViewModel.getFavList.isEmpty {
+//                let list = musicAlbumViewModel.getFavList
+//                list.forEach { elem in
+//                    cell.albumTitleLabel.text = elem.name
+//                    cell.artist.text = elem.artistName
+////                    cell.albumImage.image =
+//                }
+//            }
+            
             
             /*
              TODO: fetch core data, if empty, hide all cells. if not, isHidden = false and cell gets core data elements
@@ -146,18 +162,38 @@ extension MusicAlbumViewController: UICollectionViewDataSource {
     @objc
     func buttonPressed2() {
         print("button pressed2")
+        guard let index = self.buttonIndex else {return}
+        self.buttPressed = musicAlbumViewModel.getValAtIndex(index: index)
         if self.buttPressed {
             self.buttPressed = false
+//            albumInfo.deleteAlbum()
         
         //Selected button
         } else {
             self.buttPressed = true
             
+            //GET INDEX OF ALBUM IN MODEL
+            print("button bool: \(musicAlbumViewModel.buttonPressedAtIndex(for: index))")
+            musicAlbumViewModel.faveAlbum(for: index)
+            
+            guard let currentAlbum = musicAlbumViewModel.getFavList.last else {return}
+            let albIndex = musicAlbumViewModel.getAlbumIndex(for: currentAlbum)
+            print("current fave list: \(currentAlbum)")
+            let name = currentAlbum.name
+            let img = currentAlbum.artworkUrl100
+            let artistName = currentAlbum.artistName
+            let genre = currentAlbum.genres.compactMap({ elem in
+                elem.name
+            }).joined(separator: ", ")
+            let relDate = currentAlbum.releaseDate
+            self.albumInfo.makeAlbum(albName: name, albImage: "\(img)", artName: artistName, genre: genre, relDate: relDate)
+            print("saved to core data")
             
         }
     }
 
 }
+
 
 extension MusicAlbumViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -182,6 +218,7 @@ extension MusicAlbumViewController: UICollectionViewDelegate {
         self.navigationController?.pushViewController(albumChosen, animated: false)
     
     }
+    
     func dateReadable(date: String) -> String {
         let dateArr = date.split(separator: "-")
         switch dateArr[1] {
@@ -212,5 +249,12 @@ extension MusicAlbumViewController: UICollectionViewDelegate {
         default:
             return "Released: Gahhhhh some date"
         }
+    }
+}
+extension MusicAlbumViewController: MusicAlbumViewCellDelegate {
+    func buttonPressedAtIndex(_ index: Int) -> Int {
+        self.buttonIndex = index
+        print("button index: \(index)")
+        return index
     }
 }

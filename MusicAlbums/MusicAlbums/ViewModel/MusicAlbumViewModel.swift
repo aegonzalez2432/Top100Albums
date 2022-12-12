@@ -11,8 +11,15 @@ protocol MusicAlbumViewModelType {
     func bind(completion: @escaping() -> ())
     func fetchPage()
     var count: Int {get}
+    func setButtonStates() -> Void
+//    var buttonState: Bool {set}
+    func getValAtIndex(index: Int) -> Bool
+    var getFavList: [Results] {get}
+    func buttonPressedAtIndex(for index: Int) -> Bool
+    func getAlbumIndex(for album: Results) -> Int
     func albumTitle(for index: Int) -> String?
     func artist(for index: Int) -> String?
+    func faveAlbum(for index: Int) -> Void
     func releaseDate(for index: Int) -> String?
     func albumGenres(for index: Int) -> [Genre]
     func imageData(for index: Int, completion: @escaping (Data?) -> ())
@@ -26,9 +33,14 @@ class MusicAlbumViewModel {
     typealias UpdateHandler = (() -> ())
     
     private var musicPage: MusicPage?
+    private var favList: [Results] = []
+    private var buttonPressedBool: [Bool] = []
+    private var favIndex: [Int] = []
     private var albums: [Results] = []
     private let networkManager: NetworkManagerType
     var updateHandler: UpdateHandler?
+    var buttonToggle: Bool = false
+
     
     init(networkManager: NetworkManagerType = NetworkManager()) {
         self.networkManager = networkManager
@@ -36,14 +48,42 @@ class MusicAlbumViewModel {
     
 }
 extension MusicAlbumViewModel: MusicAlbumViewModelType {
+    func getValAtIndex(index: Int) -> Bool {
+        return buttonPressedBool[index]
+    }
+
+    func buttonPressedAtIndex(for index: Int) -> Bool {
+        if self.buttonPressedBool[index] == false {
+            self.buttonPressedBool[index] = true
+        } else {
+            self.buttonPressedBool[index] = false
+        }
+        return buttonPressedBool[index]
+    }
     
-//    func favedAlbums(for index: Int) -> Results {
-//        guard let emptyUrl = URL(string: "") else {return Results(from: 1 as! Decoder)}
-//        return Results(artistName: "", id: "", name: "", releaseDate: "", artworkUrl100: emptyUrl, genres: [])
-//    }
+    func getAlbumIndex(for album: Results) -> Int {
+        do{
+            return albums.firstIndex(where: {$0.name == album.name}) ?? 200
+        }
+    }
+    
+    var getFavList: [Results] {
+        return favList
+    }
+    
+    func setButtonStates() {
+        for _ in 0..<100 {
+            self.buttonPressedBool.append(false)
+        }
+    }
     
 
     
+    
+    func faveAlbum(for index: Int) {
+        self.favList.append(self.albums[index])
+        self.favIndex.append(index)
+    }
     
     func bind(completion: @escaping () -> ()) {
         self.updateHandler = completion
